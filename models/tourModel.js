@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const validator = require('validator');
 
 const tourSchema = new mongoose.Schema({
   name: {
@@ -7,7 +8,8 @@ const tourSchema = new mongoose.Schema({
     required: [true, 'A tour must have a name'],
     unique: true,
     maxlength: [40, 'A tour name must have less or equal then 40 characters'],
-    minlength: [10, 'A tour name must have more or equal then 10 characters']
+    minlength: [10, 'A tour name must have more or equal then 10 characters'],
+    // validate: [validator.isAlpha, 'Tour name must only contain letter']
   },
   slug: {
     type: String
@@ -36,6 +38,17 @@ const tourSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  priceDiscount: {
+    type: Number,
+    validate: {
+      validator: function (val) {
+        //👉 "val" represnts the input value, here the val refers to priceDicount   
+        // 👉 'this' points to current doc on NEW document creation 
+        return val < this.price
+      },
+      message: 'Discount price must be less than actual price'
+    }
+  },
   ratingsAverage: {
     type: Number,
     default: 4.5,
@@ -47,7 +60,7 @@ const tourSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  priceDiscount: Number,
+
   summary: {
     type: String,
     trim: true,
@@ -76,16 +89,19 @@ const tourSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
+//---------VIRTUAL PROPERTY ---------------------//
 // virtual properties will is not persisted in DB,
 // here a new virtual property is created 
 // which count the duration in weeks
 // and send to the client every time we query  
 
 tourSchema.virtual('durationInWeeks').get(function () {
+
   return this.duration / 7
 })
 
 
+//------------DOCUMENT MIDDLEWARE---------------------------//
 //NOTE:DOCUMENT Middleware only runs with .save() and .create() methods.
 
 //👇this is a 'pre' save doc middleware which will run before saving the current data into the DB
@@ -112,6 +128,7 @@ tourSchema.pre('save', function (next) {
 // })
 
 
+//-----------QUERY MIDDLEARE-------------//
 // 👇QUERY MiddleWare
 
 tourSchema.pre(/^find/, function (next) {
@@ -132,6 +149,7 @@ tourSchema.pre(/^find/, function (next) {
 // })
 
 
+//------------AGGREGATION MIDDLEWARE-----------//
 //👇 AGGREGATION MIDDLEWARE
 
 tourSchema.pre('aggregate', function (next) {
