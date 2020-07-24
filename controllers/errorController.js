@@ -1,14 +1,38 @@
 const AppError = require("../utils/appError");
 
 const handleCastErrorDB = (err) => {
+    console.log(err.name)
     const message = `Invalid ${err.path}:${err.value}`;
 
     return new AppError(message, 400)
 }
 
+const handleDuplicateFieldsDB = (err) => {
+    // const value = err.message.match(/(["'])(?:(?=(\\?))\2.)*?\1/);
+    console.log(err.name)
+    const value = err.keyValue.name
+
+    const message = `Duplicate Feild value :[${value}]. Please use another value!`;
+
+    return new AppError(message, 400);
+
+
+}
+
+const handleValidationErrorDB = (err) => {
+
+    console.log(err.name)
+    const errors = Object.values(err.errors).map(el => el.message)
+
+
+
+    const message = `Invalid input data:${errors.join('. ')}`;
+    return new AppError(message, 404)
+}
+
 const sendErrorDev = (err, res) => {
 
-    console.log({ name: err.name })
+
     res.status(err.statusCode).json({
         status: err.status,
         error: err,
@@ -19,6 +43,8 @@ const sendErrorDev = (err, res) => {
 
 const sendErrorProd = (err, res) => {
     // Operational trusted Error sent to the client
+
+
     if (err.isOperational) {
         res.status(err.statusCode).json({
             status: err.status,
@@ -36,6 +62,7 @@ const sendErrorProd = (err, res) => {
             status: 'error',
             message: 'something went very wrong'
         })
+
     }
 
 }
@@ -53,7 +80,9 @@ module.exports = (err, req, res, next) => {
     } else if (process.env.NODE_ENV.trim() === 'production') {
 
 
-        if (err.name === 'CastError') err = handleCastErrorDB(err)
+        if (err.name === 'CastError') err = handleCastErrorDB(err)// this handle invalid id path
+        if (err.code === 11000) err = handleDuplicateFieldsDB(err)    // this func handles duplicate fields error
+        if (err.name === 'ValidationError') err = handleValidationErrorDB(err) // this func handles mongoose validation error
 
         sendErrorProd(err, res)
 
