@@ -21,18 +21,20 @@ exports.aliasTopTours = (req, res, next) => {
   next();
 };
 
-exports.getAllTours = catchAsync(async (req, res) => {
+exports.getAllTours = catchAsync(async (req, res, next) => {
 
   const features = new APIFeatures(Tour.find(), req.query)
     .filter()
     .sort()
-    .fieldLimit()
+    .limitFields()
     .page();
 
   const tours = await features.query;
 
+
+  // SEND RESPONSE
   res.status(200).json({
-    status: 'succes',
+    status: 'success',
     results: tours.length,
     data: {
       tours,
@@ -40,6 +42,8 @@ exports.getAllTours = catchAsync(async (req, res) => {
   });
 
 });
+
+
 
 exports.getTour = catchAsync(async (req, res, next) => {
   console.log(req.params.id);

@@ -55,4 +55,17 @@ exports.login = catchAsync(async (req, res, next) => {
         status: 'success',
         token
     })
-})
+});
+
+exports.protect = (req, res, next) => {
+
+    // 1)Get token and check if it's there
+
+    // 2) Verification Token (verify token)
+
+    // 3) Check if user still exists
+
+    // 4) check if the user has changed password after the token was issued
+
+    next();
+}
