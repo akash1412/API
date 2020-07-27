@@ -24,11 +24,15 @@ const handleValidationErrorDB = (err) => {
     console.log(err.name)
     const errors = Object.values(err.errors).map(el => el.message)
 
-
-
     const message = `Invalid input data:${errors.join('. ')}`;
     return new AppError(message, 404)
 }
+
+const handleJwtError = () => {
+    return new AppError('Invalid Token, Please login again', 401)
+}
+
+const handleTokenExpiredError = () => new AppError('Your Token has expired! Please login again.', 401)
 
 const sendErrorDev = (err, res) => {
 
@@ -82,8 +86,9 @@ module.exports = (err, req, res, next) => {
         if (err.name === 'CastError') err = handleCastErrorDB(err)// this handle invalid id path
         if (err.code === 11000) err = handleDuplicateFieldsDB(err)    // this func handles duplicate fields error
         if (err.name === 'ValidationError') err = handleValidationErrorDB(err) // this func handles mongoose validation error
+        if (err.name === 'JsonWebTokenError') err = handleJwtError()// this func handles JWT Error
+        if (err.name === 'TokenExpiredError') err = handleTokenExpiredError()
 
-        sendErrorProd(err, res)
-
+        sendErrorProd(err, res);
     }
 }
