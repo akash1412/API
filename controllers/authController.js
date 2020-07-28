@@ -1,4 +1,4 @@
-const { promisify } = require('util')
+
 const Jwt = require('jsonwebtoken')
 const User = require('./../models/userModel');
 const catchAsync = require('../utils/catchAsync');
@@ -17,11 +17,12 @@ exports.signup = catchAsync(async (req, res, next) => {
         password: req.body.password,
         passwordConfirm: req.body.passwordConfirm,
         passwordChangedAt: req.body.passwordChangedAt,
+        role: req.body.role
     });
 
     const token = signToken(newUser._id)
 
-    res.status(201).json({ 
+    res.status(201).json({
         status: 'success',
         token,
         data: {
@@ -73,7 +74,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
     // 2) Verification Token (verify token)
 
-    //* const decoded = await promisify(Jwt.verify)(token,process.env.JWT_SECRET_KEY)
+    // TODO const decoded = await promisify(Jwt.verify)(token,process.env.JWT_SECRET_KEY)
 
     const decoded = await Jwt.verify(token, process.env.JWT_SECRET_KEY)
 
@@ -91,12 +92,38 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 
     if (currentUser.changedPasswordAfter(decoded.iat)) {
-      return  next(new AppError('User recently changed password! Please login again.', 401))
+        return next(new AppError('User recently changed password! Please login again.', 401))
     }
 
-   
-    req.user=currentUser; 
+
+    req.user = currentUser;
 
     //GRANT ACCESS TO THE PROTECTED ROUTES
     next();
+});
+
+
+exports.restrictTo = (...roles) => {
+
+    return (req, res, next) => {
+        if (!roles.includes(req.user.role)) {
+            return next(new AppError('You do not have permission to perform this action', 403))
+        }
+
+        next();
+    }
+};
+
+
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+    // 1) GET USER withPOST requet details 
+
+    // 2) Genrate token
+
+    //3) send token to the email address
+})
+
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
+
 })
