@@ -6,7 +6,7 @@ const Tour = require('./models/tourModel');
 dotenv.config({ path: './config.env' });
 
 const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`, 'utf-8')
+  fs.readFileSync(`${__dirname}/dev-data/data/tours.json`, 'utf-8')
 );
 
 const DB = process.env.DATABASE.replace(
