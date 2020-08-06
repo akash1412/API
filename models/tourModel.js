@@ -113,6 +113,7 @@ const tourSchema = new mongoose.Schema(
       },
     ],
     guides: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],
+    // reviews: [{ type: mongoose.Schema.ObjectId, ref: 'Review' }],
   },
   {
     toJSON: { virtuals: true },
@@ -128,6 +129,12 @@ const tourSchema = new mongoose.Schema(
 
 tourSchema.virtual('durationInWeeks').get(function () {
   return this.duration / 7;
+});
+
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
 });
 
 //------------DOCUMENT MIDDLEWARE---------------------------//
@@ -175,7 +182,10 @@ tourSchema.pre(/^find/, function (next) {
 });
 
 tourSchema.pre(/^find/, function (next) {
-  this.populate({ path: 'guides', select: '-__v -passwordChangedAt' });
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
 
   next();
 });

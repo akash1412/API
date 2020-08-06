@@ -8,6 +8,7 @@ const hpp = require('hpp');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 const tourController = require('./controllers/tourController');
 
 const globalErrorHandler = require('./controllers/errorController');
@@ -42,9 +43,18 @@ app.use(mongoSanitize()); //👈 this prevents hacker to query data by injecting
 app.use(XSS()); //👈 This prevents from injecting any kind of html element with a script.
 
 // preventing parameter polluiton
-app.use(hpp({
-  whitelist:['duration','ratingsQuantity','ratingsAverage','maxGroupSize','difficulty','price']
-}));
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price',
+    ],
+  })
+);
 
 //* SERVING STATIC FILES
 app.use(express.static(`${__dirname}/public`));
@@ -56,6 +66,8 @@ app.use('/api/v1/tours', tourRouter);
 
 // user middleware
 app.use('/api/v1/users', userRouter);
+
+app.use('/api/v1/reviews', reviewRouter);
 
 app.use('/api/v1/search', tourController.search);
 
