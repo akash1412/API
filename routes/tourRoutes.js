@@ -8,6 +8,8 @@ const router = express.Router();
 // PARAM MIDDLEWARE
 // router.param('id', tourController.checkID);
 
+router.param('id', authController.protect);
+
 router.use('/:tourId/reviews', reviewRouter);
 
 router
@@ -18,19 +20,28 @@ router.route('/tour-stats').get(tourController.tourStats);
 router.route('/monthly-plan/:id').get(tourController.getMonthlyPlan);
 
 router
+  .route('/tours-within/:distance/center/:latlang/unit/:unit')
+  .get(tourController.getToursWithin);
+
+router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
+
+router
   .route('/')
-  .get(authController.protect, tourController.getAllTours)
-  .post(tourController.createTour);
+  .get(tourController.getAllTours)
+  .post(
+    authController.protect,
+    authController.restrictTo('admin'),
+    tourController.createTour
+  );
 
 router
   .route('/:id')
   .get(tourController.getTour)
-  .patch(tourController.updateTour)
-  .delete(
-    authController.protect,
+  .patch(
     authController.restrictTo('admin', 'lead-guide'),
-    tourController.deleteTour
-  );
+    tourController.updateTour
+  )
+  .delete(authController.restrictTo('admin'), tourController.deleteTour);
 
 // Nested Routes
 // GET /tours/:tourId/reviews

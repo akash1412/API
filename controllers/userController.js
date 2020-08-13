@@ -1,7 +1,7 @@
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const { resolveConfig } = require('prettier');
+const Factory = require('./handlerFactory');
 
 const filterObj = (obj, ...allowedFields) => {
   let newObj = {};
@@ -18,16 +18,13 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-exports.getAllUser = catchAsync(async (req, res) => {
-  const users = await User.find();
+exports.getAllUser = Factory.getAll(User);
 
-  res.status(200).json({
-    status: 'success',
-    data: {
-      users,
-    },
-  });
-});
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+
+  next();
+};
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   if (req.body.password || req.body.passwordConfirm) {
@@ -67,29 +64,7 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.createUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'Route not implemented yet',
-  });
-};
-exports.getUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'Route not implemented yet',
-  });
-};
-exports.updateUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'Route not implemented yet',
-  });
-};
+exports.getUser = Factory.getOne(User);
 
-exports.deleteUser = catchAsync(async (req, res) => {
-  await User.findByIdAndDelete(req.params.id);
-
-  res.status(204).json({
-    status: 'success',
-  });
-});
+exports.updateUser = Factory.updateOne(User); // <-- Restrict updating password with this route
+exports.deleteUser = Factory.deleteOne(User);

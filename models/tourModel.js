@@ -55,6 +55,7 @@ const tourSchema = new mongoose.Schema(
       default: 4.5,
       min: [1, 'A rating must be above 1'],
       max: [5, 'A rating must be below 5'],
+      set: (val) => Math.round(val * 10),
     },
 
     ratingsQuantity: {
@@ -121,8 +122,10 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
-//---------VIRTUAL PROPERTY ---------------------//
-// virtual properties will is not persisted in DB,
+// tourSchema.index({ price: 1 });
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' }); // virtual properties will is not persisted in DB,
 // here a new virtual property is created
 // which count the duration in weeks
 // and send to the client every time we query
@@ -175,9 +178,8 @@ tourSchema.pre('save', function (next) {
 // 👇QUERY MiddleWare
 
 tourSchema.pre(/^find/, function (next) {
-  // tourSchema.pre('find', function (next) {
+  // tourSchema.pre('find', function (next) =
   this.find({ secretTour: { $ne: true } });
-
   next();
 });
 
@@ -203,10 +205,10 @@ tourSchema.pre(/^find/, function (next) {
 //------------AGGREGATION MIDDLEWARE-----------//
 //👇 AGGREGATION MIDDLEWARE
 
-tourSchema.pre('aggregate', function (next) {
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  next();
-});
+// tourSchema.pre('aggregate', function (next) {
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   next();
+// });
 
 const Tour = mongoose.model('Tour', tourSchema);
 
