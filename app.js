@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -15,6 +16,12 @@ const globalErrorHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 
 const app = express();
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
+//* SERVING STATIC FILES
+app.use(express.static(path.join(__dirname, 'public')));
 
 const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,
@@ -56,10 +63,26 @@ app.use(
   })
 );
 
-//* SERVING STATIC FILES
-app.use(express.static(`${__dirname}/public`));
-
 console.log(process.env.NODE_ENV.trim());
+
+app.get('/', (req, res) => {
+  res.status(200).render('base', {
+    tour: 'Forest Hiker',
+    name: 'Jonas',
+  });
+});
+
+app.get('/overview', (req, res) => {
+  res.status(200).render('base', {
+    title: 'All tours',
+  });
+});
+
+app.get('/tour', (req, res) => {
+  res.status(200).render('base', {
+    title: 'The Forest Hiker',
+  });
+});
 
 // tour middleware
 app.use('/api/v1/tours', tourRouter);
