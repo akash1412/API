@@ -10,6 +10,7 @@ const hpp = require('hpp');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 const tourController = require('./controllers/tourController');
 
 const globalErrorHandler = require('./controllers/errorController');
@@ -65,24 +66,7 @@ app.use(
 
 console.log(process.env.NODE_ENV.trim());
 
-app.get('/', (req, res) => {
-  res.status(200).render('base', {
-    tour: 'Forest Hiker',
-    name: 'Jonas',
-  });
-});
-
-app.get('/overview', (req, res) => {
-  res.status(200).render('base', {
-    title: 'All tours',
-  });
-});
-
-app.get('/tour', (req, res) => {
-  res.status(200).render('base', {
-    title: 'The Forest Hiker',
-  });
-});
+app.use('/', viewRouter);
 
 // tour middleware
 app.use('/api/v1/tours', tourRouter);
