@@ -1,3 +1,4 @@
+const expressMongoSanitize = require('express-mongo-sanitize');
 const Tour = require('../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
 
@@ -21,3 +22,9 @@ exports.getTour = catchAsync(async (req, res, next) => {
     tour,
   });
 });
+
+exports.getLoginForm = (req, res) => {
+  res.status(200).render('login', {
+    title: 'Log into your account',
+  });
+};

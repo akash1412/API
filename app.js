@@ -6,6 +6,8 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const XSS = require('xss-clean');
 const hpp = require('hpp');
+const cors = require('cors');
+const cookies = require('cookie-parser');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -17,6 +19,8 @@ const globalErrorHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 
 const app = express();
+
+app.use(cors());
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -44,6 +48,8 @@ if (process.env.NODE_ENV === 'development') {
 // Parses Incoming JSON requests
 app.use(express.json({ limit: '20kb' }));
 
+app.use(cookies());
+
 // DATA Sanitization against NoSql query Injection
 app.use(mongoSanitize()); //👈 this prevents hacker to query data by injecting mallecious code in req.body
 
@@ -65,6 +71,12 @@ app.use(
 );
 
 console.log(process.env.NODE_ENV.trim());
+
+app.use((req, res, next) => {
+  console.log(req.cookies);
+
+  next();
+});
 
 app.use('/', viewRouter);
 
