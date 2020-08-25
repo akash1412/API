@@ -12,7 +12,7 @@ process.on('uncaughtException', err => {
 
 const app = require('./app');
 
-const port = process.env.PORT || 2;
+const port = process.env.PORT || 3000;
 
 const DB = process.env.DATABASE.replace(
   '<password>',
