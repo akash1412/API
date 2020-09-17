@@ -20,7 +20,7 @@ const AppError = require('./utils/appError');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: true }));
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -72,11 +72,11 @@ app.use(
 
 console.log(process.env.NODE_ENV.trim());
 
-app.use((req, res, next) => {
-  console.log(req.cookies);
+// app.use((req, res, next) => {
+//   // console.log(req.cookies);
 
-  next();
-});
+//   next();
+// });
 
 app.use('/', viewRouter);
 
